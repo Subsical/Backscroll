@@ -206,17 +206,16 @@ class _MessageListState extends State<MessageList> {
     (actions) => showMessageSheet(context, actions: actions),
   );
 
-  Future<void> _menu(Message message, Rect anchor) => _choose(
-    message,
-    (actions) => showMessageMenu(
-      context,
-      actions: actions,
-      position: RelativeRect.fromRect(
-        anchor,
-        Offset.zero & MediaQuery.sizeOf(context),
-      ),
-    ),
-  );
+  Future<void> _menu(Message message, Offset at, {bool rightAligned = false}) =>
+      _choose(
+        message,
+        (actions) => showMessageMenu(
+          context,
+          actions: actions,
+          at: at,
+          rightAligned: rightAligned,
+        ),
+      );
 
   Widget _toolbar(BuildContext context, String? id, Widget? child) {
     final message = _byId[id];
@@ -235,7 +234,7 @@ class _MessageListState extends State<MessageList> {
         child: _Toolbar(
           actions: actions.of(message),
           onAction: (action) => actions.run(context, action, message),
-          onMore: (button) => _menu(message, button),
+          onMore: (corner) => _menu(message, corner, rightAligned: true),
         ),
       ),
     );
@@ -463,7 +462,7 @@ class _Toolbar extends StatelessWidget {
 
   final List<MessageAction> actions;
   final ValueChanged<MessageAction> onAction;
-  final ValueChanged<Rect> onMore;
+  final ValueChanged<Offset> onMore;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -490,9 +489,7 @@ class _Toolbar extends StatelessWidget {
         _BarButton(
           icon: Icons.more_horiz_rounded,
           tooltip: 'More',
-          onTap: (button) => onMore(
-            Rect.fromLTWH(button.left, button.bottom + 4, button.width, 0),
-          ),
+          onTap: (button) => onMore(button.bottomRight + const Offset(0, 4)),
         ),
       ],
     ),
@@ -641,7 +638,7 @@ class _HoverState extends State<_Hover> {
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onSecondaryTapUp: (details) =>
-                    list._menu(message, details.globalPosition & Size.zero),
+                    list._menu(message, details.globalPosition),
                 child: ValueListenableBuilder(
                   valueListenable: list._focus,
                   builder: (context, focus, _) =>

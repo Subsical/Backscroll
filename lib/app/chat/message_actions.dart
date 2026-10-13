@@ -115,23 +115,36 @@ class MessageActions {
   }
 }
 
+const _menuWidth = 224.0;
+
+// Flutter opens a menu towards the half of the window with more room. Discord
+// opens it to the right of the pointer and only turns it around when it would
+// not fit, so the side is picked here.
 Future<MessageAction?> showMessageMenu(
   BuildContext context, {
   required List<MessageAction> actions,
-  required RelativeRect position,
-}) => showMenu<MessageAction>(
-  context: context,
-  position: position,
-  popUpAnimationStyle: AnimationStyle.noAnimation,
-  menuPadding: const EdgeInsets.symmetric(vertical: 6),
-  items: [
-    for (final (index, action) in actions.indexed) ...[
-      if (index > 0 && action.exports != actions[index - 1].exports)
-        const _MenuGap(),
-      _MenuRow(action),
+  required Offset at,
+  bool rightAligned = false,
+}) {
+  final window = MediaQuery.sizeOf(context);
+  final toTheLeft = rightAligned || at.dx + _menuWidth + 8 > window.width;
+  return showMenu<MessageAction>(
+    context: context,
+    position: toTheLeft
+        ? RelativeRect.fromLTRB(window.width, at.dy, window.width - at.dx, 0)
+        : RelativeRect.fromLTRB(at.dx, at.dy, window.width, 0),
+    constraints: const BoxConstraints.tightFor(width: _menuWidth),
+    popUpAnimationStyle: AnimationStyle.noAnimation,
+    menuPadding: const EdgeInsets.symmetric(vertical: 6),
+    items: [
+      for (final (index, action) in actions.indexed) ...[
+        if (index > 0 && action.exports != actions[index - 1].exports)
+          const _MenuGap(),
+        _MenuRow(action),
+      ],
     ],
-  ],
-);
+  );
+}
 
 class _MenuRow extends PopupMenuEntry<MessageAction> {
   const _MenuRow(this.action);

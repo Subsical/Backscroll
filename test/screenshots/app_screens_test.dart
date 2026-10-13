@@ -948,6 +948,41 @@ void main() {
     await h.dispose(tester);
   });
 
+  testWidgets(
+    'the message menu opens to the right of the pointer',
+    variant: desktop,
+    (tester) async {
+      tester.view.physicalSize = const Size(1000, 760);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final world = SampleWorld()..build();
+      final h = (await tester.runAsync(
+        () => AppHarness.create(bot: false, world: world),
+      ))!;
+      await tester.pumpWidget(h.app);
+      await h.waitFor(tester, () => h.library.state == LoadState.ready);
+      await h.settle(tester);
+      await tester.tap(find.text('Nick').first);
+      await h.settle(tester);
+      final row = chatTile(world.messages(SampleWorld.nickDmId)[1]['id']);
+      final y = tester.getCenter(row).dy;
+
+      Future<double> menuLeft(double x) async {
+        await tester.tapAt(Offset(x, y), buttons: kSecondaryButton);
+        await h.settle(tester, frames: 3);
+        final label = tester.getTopLeft(find.text('Export from here')).dx;
+        await tester.tapAt(const Offset(20, 740));
+        await h.settle(tester, frames: 3);
+        expect(find.text('Export from here'), findsNothing);
+        return label - 44;
+      }
+
+      expect(await menuLeft(700), closeTo(700, 1));
+      expect(await menuLeft(900), closeTo(900 - 224, 1));
+      await h.dispose(tester);
+    },
+  );
+
   testWidgets('holding a message opens its actions', (tester) async {
     phoneView(tester);
     final world = SampleWorld()..build();
