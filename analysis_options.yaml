@@ -1,0 +1,14 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - windows/**
+    - linux/**
+
+linter:
+  rules:
+    prefer_single_quotes: true
+    unawaited_futures: true
+    always_declare_return_types: true
