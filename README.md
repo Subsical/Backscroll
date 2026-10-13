@@ -1,6 +1,6 @@
 # Backscroll
 
-[![Latest release](https://img.shields.io/github/v/release/Subsical/Backscroll?include_prereleases&label=release)](https://github.com/Subsical/Backscroll/releases)
+[![Latest release](https://img.shields.io/github/v/release/Subsical/Backscroll?label=release)](https://github.com/Subsical/Backscroll/releases)
 [![Tests](https://github.com/Subsical/Backscroll/actions/workflows/test.yml/badge.svg)](https://github.com/Subsical/Backscroll/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
@@ -15,7 +15,7 @@ I wanted something like [DiscordChatExporter](https://github.com/Tyrrrz/DiscordC
 
 ## Download
 
-Get the latest beta from the [releases page](https://github.com/Subsical/Backscroll/releases): a zip for Windows, a tarball for Linux and an APK for Android. The Windows app is signed with a self-signed certificate, so SmartScreen asks you to confirm the first time you run it.
+Get the latest version from the [releases page](https://github.com/Subsical/Backscroll/releases): a zip for Windows, a tarball for Linux and an APK for Android. The Windows app is signed with a self-signed certificate, so SmartScreen asks you to confirm the first time you run it.
 
 ## Features
 
