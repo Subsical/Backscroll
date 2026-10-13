@@ -21,6 +21,44 @@ enum MessageAction {
   final IconData icon;
 
   bool get exports => this == exportFrom || this == exportUntil;
+
+  Widget glyph({required double size, Color color = Palette.subtle}) =>
+      this == copyId
+      ? _IdBadge(size: size, color: color)
+      : Icon(icon, size: size, color: color);
+}
+
+// Discord draws this one as a small plate with the letters cut out
+class _IdBadge extends StatelessWidget {
+  const _IdBadge({required this.size, required this.color});
+
+  final double size;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => SizedBox.square(
+    dimension: size,
+    child: Center(
+      child: Container(
+        width: size * 0.9,
+        height: size * 0.7,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(size * 0.15),
+        ),
+        child: Text(
+          'ID',
+          style: TextStyle(
+            color: Palette.floating,
+            fontSize: size * 0.5,
+            fontWeight: FontWeight.w800,
+            height: 1,
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 class MessageActions {
@@ -85,21 +123,82 @@ Future<MessageAction?> showMessageMenu(
   context: context,
   position: position,
   popUpAnimationStyle: AnimationStyle.noAnimation,
+  menuPadding: const EdgeInsets.symmetric(vertical: 6),
   items: [
-    for (final action in actions)
-      PopupMenuItem(
-        value: action,
-        height: 36,
+    for (final (index, action) in actions.indexed) ...[
+      if (index > 0 && action.exports != actions[index - 1].exports)
+        const _MenuGap(),
+      _MenuRow(action),
+    ],
+  ],
+);
+
+class _MenuRow extends PopupMenuEntry<MessageAction> {
+  const _MenuRow(this.action);
+
+  final MessageAction action;
+
+  @override
+  double get height => 36;
+
+  @override
+  bool represents(MessageAction? value) => value == action;
+
+  @override
+  State<_MenuRow> createState() => _MenuRowState();
+}
+
+class _MenuRowState extends State<_MenuRow> {
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+    child: InkWell(
+      onTap: () => Navigator.pop(context, widget.action),
+      borderRadius: BorderRadius.circular(4),
+      hoverColor: Palette.hover,
+      mouseCursor: SystemMouseCursors.click,
+      child: Container(
+        height: 32,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Row(
           children: [
-            Expanded(child: Text(action.label)),
-            const SizedBox(width: 24),
-            Icon(action.icon, size: 18, color: Palette.subtle),
+            widget.action.glyph(size: 20),
+            const SizedBox(width: 8),
+            Text(
+              widget.action.label,
+              style: const TextStyle(
+                color: Palette.text,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ],
         ),
       ),
-  ],
-);
+    ),
+  );
+}
+
+class _MenuGap extends PopupMenuEntry<Never> {
+  const _MenuGap();
+
+  @override
+  double get height => 17;
+
+  @override
+  bool represents(void value) => false;
+
+  @override
+  State<_MenuGap> createState() => _MenuGapState();
+}
+
+class _MenuGapState extends State<_MenuGap> {
+  @override
+  Widget build(BuildContext context) => const Padding(
+    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    child: Divider(height: 1, color: Palette.divider),
+  );
+}
 
 Future<MessageAction?> showMessageSheet(
   BuildContext context, {
@@ -152,7 +251,7 @@ class _SheetGroup extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               child: Row(
                 children: [
-                  Icon(action.icon, size: 24, color: Palette.subtle),
+                  action.glyph(size: 24),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Text(
